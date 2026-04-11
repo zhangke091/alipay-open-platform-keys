@@ -116,7 +116,7 @@ ABS=$(cd "$OUT" && pwd -P)
 echo ""
 echo "=========================================="
 if [[ "$CERT_MODE" -eq 1 ]]; then
-  echo "Alipay RSA2 密钥对 + CSR 已生成（2048 位，证书模式材料）"
+  echo "Alipay RSA2 密钥对 + CSR 已生成（2048 位，证书模式）"
 else
   echo "Alipay RSA2 密钥对已生成（2048 位，PEM，公钥模式）"
 fi
@@ -155,7 +155,7 @@ if [[ "$CERT_MODE" -eq 1 ]]; then
   echo "  - 控制台「接口加签方式」须选证书模式，并与 SDK/代码配置一致。"
   echo "  - CSR 被拒时核对开放平台文档中的 Subject/扩展项要求；勿使用占位 Subject 上线。"
 else
-  echo "  - 控制台「接口加签方式」须与代码一致（本输出为公钥模式材料）。"
+  echo "  - 控制台「接口加签方式」须与代码一致（本输出为公钥模式密钥文件）。"
 fi
 echo ""
 echo "下一步:"
