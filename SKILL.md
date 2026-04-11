@@ -13,6 +13,8 @@ description: >-
 
 **脚本用法**：在仓库中路径一般为 `skills/alipay-open-platform-keys/scripts/generate_alipay_rsa2_keys.sh`。公钥模式直接执行；证书模式加 **`--cert`** 与 **`--subj`**（或 `ALIPAY_CSR_SUBJ`）。完整参数执行 **`bash …/generate_alipay_rsa2_keys.sh --help`**。
 
+**公私钥是否成对**：用同目录下 **`scripts/verify_alipay_rsa2_keypair.sh`**（`bash …/verify_alipay_rsa2_keypair.sh <私钥.pem> <公钥.pem>`，顺序可互换）；或代码中调用项目里的 **`alipay_rsa2.rsa_keys_match`**。见下方 Agent 约束，**默认由用户在本地执行**，避免私钥进入对话上下文。
+
 ## 闭环边界
 
 | 环节 | 是否依赖 Skill 外 |
@@ -51,6 +53,7 @@ description: >-
 3. **失败**：对照 [reference.md「常见报错引导」](reference.md#常见报错引导)。
 4. **材料分工**：公钥模式为「应用私钥 / 应用公钥 / 支付宝公钥」；证书模式为「应用私钥 / CSR→应用证书 / 平台证书链」，以文档为准。
 5. **验签失败**：区分请求侧（应用私钥与控制台应用公钥/证书是否匹配）与回调侧（支付宝公钥或证书是否最新、参数编码是否破坏待签串）。
+6. **公私钥匹配**：用户仅询问「是否成对 / 如何校验」时，**只说明**如何用 **`verify_alipay_rsa2_keypair.sh`** 或 **`rsa_keys_match`** 在**本机终端**执行，给出命令与预期输出即可；**不要**主动代跑会读取私钥路径的命令，**不要**要求用户粘贴私钥全文。若用户明确要求 Agent 代跑，可用 **`--no-print`** 类思路避免在回复中复述 PEM；仍优先让用户本地执行。
 
 ## 环境变量（示例）
 

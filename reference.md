@@ -22,6 +22,8 @@
 bash skills/alipay-open-platform-keys/scripts/generate_alipay_rsa2_keys.sh --help
 ```
 
+自检（脚本行为与 OpenSSL 校验，无需额外测试框架）：`bash skills/alipay-open-platform-keys/scripts/test_generate_alipay_rsa2_keys.sh`
+
 公钥模式：直接执行脚本（路径按仓库调整）。证书模式：`--cert`，并用 **`--subj '...'`** 或 **`ALIPAY_CSR_SUBJ`** 提供 CSR Subject；字段以 [生成密钥](https://opendocs.alipay.com/common/02kipl) 为准。未提供 Subject 时脚本使用占位值并告警。
 
 脚本在实现上等同于：2048 位 RSA、`openssl genpkey` + `pkey -pubout`；证书模式再加 `openssl req -new -sha256`。若已有旧式 `BEGIN RSA PRIVATE KEY`，可 **`openssl pkcs8 -topk8 -nocrypt`** 转为 PKCS#8 再接入 SDK。若在应用内用 Python 生成，需输出 **PKCS#8 私钥** 与 **SPKI 公钥** PEM，与脚本一致即可，无需在此重复示例代码。

@@ -7,6 +7,7 @@
 | `SKILL.md` | 流程、Agent 约束、YAML 描述（触发匹配） |
 | `reference.md` | 依赖、脚本要点、报错表、文档链接、PEM/安全 |
 | `scripts/generate_alipay_rsa2_keys.sh` | 公钥模式 / `--cert` 证书模式；`--help` 查看参数 |
+| `scripts/test_generate_alipay_rsa2_keys.sh` | 自检脚本（需 `openssl`）：`bash scripts/test_generate_alipay_rsa2_keys.sh` |
 
 ## 安装
 
