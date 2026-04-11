@@ -1,6 +1,6 @@
 # alipay-open-platform-keys（Agent Skill）
 
-本目录为 **支付宝开放平台** RSA2 密钥配置的 Agent Skill：`SKILL.md` 为智能体说明，**`description` 采用与开放平台文档相近的说明体例**（适用范围、能力说明、使用时机）。
+本目录为 **支付宝开放平台** RSA2 密钥配置的 Agent Skill：`SKILL.md` 为智能体说明，**`description` 适用范围、能力说明、使用时机**
 
 ## 安装与使用
 
@@ -34,6 +34,3 @@
 | `SKILL.md` | 主技能（YAML `name` / `description` + 正文） |
 | `reference.md` | 官方文档链接、排错表、环境与工具说明 |
 
-## 开源发布
-
-可将本目录单独作为 GitHub 仓库发布；根目录可自行添加 `LICENSE`（如 MIT）。
