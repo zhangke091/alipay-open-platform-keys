@@ -13,4 +13,11 @@
 
 ## 安装
 
-将本目录放到 `~/.cursor/skills/`、`~/.claude/skills/` 或项目内 `.cursor/skills/` / `.claude/skills/`（以各产品文档为准）。详见 [Cursor Skills](https://cursor.com/docs/skills)、[Claude Code Skills](https://code.claude.com/docs/en/skills)、[agentskills.io](https://agentskills.io/)。
+在 Cursor / Claude Code 等支持 Agent Skills 的环境中，需要把 **`alipay-open-platform-keys` 技能包**（即包含 `SKILL.md` 的完整文件夹，名称可保持 `alipay-open-platform-keys`）放到产品约定的 Skills 搜索路径下，以便助手加载该技能。
+
+常见做法（具体以各产品当前文档为准）：
+
+- **用户级**：`~/.cursor/skills/` 或 `~/.claude/skills/`
+- **项目级**：仓库内的 `.cursor/skills/` 或 `.claude/skills/`
+
+产品说明与目录约定见 [Cursor Skills](https://cursor.com/docs/skills)、[Claude Code Skills](https://code.claude.com/docs/en/skills)、[agentskills.io](https://agentskills.io/)。
