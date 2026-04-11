@@ -1,4 +1,4 @@
-# 参考：官方文档、工具与排错
+# 参考：本地生成、依赖、报错与排错
 
 ## 环境与工具
 
@@ -32,63 +32,139 @@
 
 ---
 
-## 官方文档（请以文档中心最新页面为准）
+## 环境与依赖
 
-以下链接为支付宝开放平台 **文档中心** 常用入口（路径可能随改版调整，检索关键词：**生成密钥**、**RSA2**、**接口加签**）：
+在执行任何脚本前，Agent 应提示用户完成以下检查（或代为执行 `which` / `openssl version` / `python3 -c "import cryptography"`）。
+
+### OpenSSL（推荐作为首选生成方式）
+
+| 检查 | 说明 |
+|------|------|
+| 是否安装 | 终端执行 `openssl version`，应显示 OpenSSL 版本（如 1.1.x / 3.x）。 |
+| 未找到命令 | **macOS**：可安装 Xcode Command Line Tools 或通过 Homebrew 安装 `openssl`；**Windows**：安装 OpenSSL 或 Git for Windows 自带环境；**Linux**：`apt/yum` 安装 `openssl`。 |
+| 权限 | 私钥文件建议 `chmod 600`，避免全局可读。 |
+
+使用 OpenSSL 生成密钥对 **不需要** Python 或 `pip`。适合「零依赖」闭环。
+
+### Python + cryptography（若用户需要脚本生成或后续接入同一语言）
+
+| 依赖 | 说明 |
+|------|------|
+| Python | 建议 **Python 3.9+**；用 `python3 --version` 确认。 |
+| 包 | `cryptography`（RSA 密钥生成与 PEM 序列化）。 |
+| 安装 | `python3 -m pip install cryptography`；若项目有 `requirements.txt`，添加一行：`cryptography>=42.0.0`。 |
+| 虚拟环境（推荐） | `python3 -m venv .venv && source .venv/bin/activate`（Windows 用 `.\.venv\Scripts\activate`），再 `pip install cryptography`，避免污染系统 Python。 |
+| 校验 | `python3 -c "from cryptography.hazmat.primitives.asymmetric import rsa; print('ok')"` |
+
+若 `pip install` 报 **hash 不匹配**（部分环境启用 `--require-hashes`）：可改用未锁 hash 的安装命令，或在 venv 内安装；具体策略以团队安全规范为准。
+
+---
+
+## 本地脚本生成密钥
+
+与支付宝桌面**密钥工具**目标一致（得到可接入开放平台的密钥材料），在本地用命令行完成。粘贴到控制台时以页面为准（有的要求去掉 PEM 头尾）。
+
+### 推荐：OpenSSL（无 Python 依赖）
+
+```bash
+openssl genpkey -algorithm RSA -out app_private_key.pem -pkeyopt rsa_keygen_bits:2048
+openssl pkey -in app_private_key.pem -pubout -out app_public_key.pem
+```
+
+- **`app_private_key.pem`**：请求 **RSA2 加签**（勿提交）。
+- **`app_public_key.pem`**：上传 **应用公钥**。
+
+再到 [开放平台](https://open.alipay.com) → 应用 → **开发信息** 绑定公钥，并保存 **支付宝公钥** 用于回调验签。
+
+### 备选：传统私钥转 PKCS#8
+
+```bash
+openssl pkcs8 -topk8 -inform PEM -in rsa_legacy.pem -out app_private_key.pem -nocrypt
+```
+
+### Python 最小示例（需已安装 cryptography）
+
+仅作示意；运行前**必须**已满足上文「环境与依赖」中的 pip 检查。
+
+```python
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+priv_pem = key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption(),
+)
+pub_pem = key.public_key().public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo,
+)
+# 将 priv_pem / pub_pem 写入文件，勿打印到日志
+```
+
+### 支付宝桌面密钥工具（可选）
+
+与脚本二选一即可；**不要混用两套未对齐的公私钥**。
+
+---
+
+## 常见报错引导（命令行与 Python）
+
+| 报错或现象 | 含义与处理 |
+|------------|------------|
+| `openssl: command not found` | 未安装或不在 `PATH`。按上文「OpenSSL」安装后重开终端。 |
+| `Unable to load PEM` / `bad decrypt` | PEM 内容损坏、路径错误、或私钥加密但未提供密码。检查文件路径与格式。 |
+| `Permission denied` 写文件 | 当前目录无写权限；换目录或 `chmod` 父目录。 |
+| `ModuleNotFoundError: No module named 'cryptography'` | 未安装依赖。执行 `python3 -m pip install cryptography`（建议在 venv 内）。 |
+| `pip` 报 hash 与 requirements 不符 | 使用 venv；或暂时不用 `-r requirements.txt` 的 hash 锁；或只安装 `cryptography` 单行无 hash。 |
+| `ImportError` 其它模块 | 仅使用本 Skill 示例时一般只需 `cryptography`；若自研代码还依赖其它包，按报错补装。 |
+
+---
+
+## 官方文档（请以文档中心最新页面为准）
 
 | 主题 | 说明 |
 |------|------|
-| [生成密钥](https://opendocs.alipay.com/common/02kipl) | 密钥生成步骤、工具使用、公钥/证书模式说明 |
-| [如何生成及配置 RSA2 密钥](https://opendocs.alipay.com/support/01raut) | RSA2 配置、控制台操作要点 |
-| [支付宝密钥工具](https://opendocs.alipay.com/mini/02c7i5) | 密钥工具功能与使用说明（Windows / macOS） |
+| [生成密钥](https://opendocs.alipay.com/common/02kipl) | 密钥格式、控制台配置、公钥/证书模式 |
+| [如何生成及配置 RSA2 密钥](https://opendocs.alipay.com/support/01raut) | RSA2、开发信息要点 |
+| [支付宝密钥工具](https://opendocs.alipay.com/mini/02c7i5) | 官方图形工具（可选） |
 
-开放平台首页：[https://open.alipay.com](https://open.alipay.com) → 控制台 → 对应应用 → **开发设置** 中配置密钥与查看 **APPID**。
-
-**说明**：文档中若提供密钥工具 **下载地址**，应使用文档当前页链接下载，避免使用来路不明的安装包。
-
-## 官方密钥工具（摘要）
-
-- **用途**：生成 RSA2 密钥对、在证书模式下生成 **CSR** 等，与控制台「接口加签方式」配合使用。
-- **平台**：常见为 **Windows、macOS**；部分文档或社区会提及 **Homebrew** 安装方式（如 `alipay-key-tool`），以**文档中心当前说明**为准。
-- **原则**：私钥仅在本地安全保存；上传控制台的应是 **应用公钥** 或按流程提交 **CSR**，不要把私钥上传到任何非受控页面。
+---
 
 ## 证书模式与 SDK 常见配置名
 
-若使用 Java/PHP 等官方 SDK 的 **证书模式**，文档中常出现三类文件（名称因 SDK 而异）：
+- **应用公钥证书**、**支付宝公钥证书**、**支付宝根证书**（若要求）。  
+- CSR 的 DN 以开放平台文档为准。
 
-- **应用公钥证书**（应用身份）
-- **支付宝公钥证书**
-- **支付宝根证书**（校验证书链）
+---
 
-三者路径需与代码/SDK 配置一致；根证书或链错误时，可能出现验签或 TLS 相关问题，需对照文档排查。
-
-## 常见错误提示与含义（排查密钥时）
+## 常见业务侧错误（密钥相关）
 
 | 现象或文案 | 常见原因 | 处理方向 |
 |------------|----------|----------|
-| **验签失败** / **invalid signature** / **INVALID_SIGNATURE** | 应用私钥与控制台 **应用公钥** 不是一对；或回调侧 **支付宝公钥** 非当前应用/已过期；或待签参数被改写（含编码、`+` 与空格） | 核对密钥对与控制台；回调单独核对支付宝公钥；检查 query/body 解析 |
-| **sub_code 与签名相关**（具体码以文档为准） | 请求未按规范加签、缺参、`sign_type` 与算法不一致 | 对照待签串规则与 `RSA2` |
-| 沙箱与正式混用 | 沙箱 APPID、网关、密钥与正式环境交叉配置 | 沙箱、正式 **分别** 配置密钥与网关 |
-| 证书过期 | 应用证书或支付宝证书超过有效期 | 控制台续期或重新申请，更新本地路径与部署 |
-| 仅回调失败、下单成功 | 多为 **支付宝公钥** 配置错误或 URL 解码问题 | 更新公钥；解析参数时对 `sign` 与其它字段区分解码 |
+| **验签失败** / **invalid signature** | 公私钥不成对；支付宝公钥错误；待签参数被编码破坏 | 核对密钥与控制台；检查 query/body 解析 |
+| **sub_code 与签名相关**（以文档为准） | 加签缺参、`sign_type` 不一致 | 对照待签串与 RSA2 |
+| 沙箱与正式混用 | APPID、网关、密钥交叉 | 分环境配置 |
+| 仅回调失败 | 支付宝公钥或 URL 解析问题 | 更新公钥；区分 `sign` 与其它字段解码 |
 
-**注意**：开放平台返回的 **具体错误码与 sub_msg** 以当时接口文档及响应为准，本表仅作分类参考。
+---
 
 ## 注意事项（安全与运维）
 
-1. **私钥泄露**：视为严重安全事件，应立即在控制台轮换 **应用公钥/证书** 并更换私钥，检查审计日志。
-2. **加签方式一致**：控制台选「公钥」或「证书」须与代码/SDK 一致；混用会导致请求验签失败。
-3. **勿提交密钥**：`.gitignore` 忽略 `*.pem`、`*.env`、`*local.env`；CI 使用密钥变量或密钥管理服务。
-4. **多人协作**：通过安全通道传递密钥片段；禁止在即时通讯中发送完整私钥文件。
+1. 私钥泄露：立即轮换控制台公钥与本地私钥。  
+2. 加签方式与控制台一致（公钥 / 证书）。  
+3. 勿将 `*.pem`、本地 env 提交仓库。  
+4. 勿在即时通讯中发送完整私钥。
 
-## PEM 格式与验签实现
+## PEM 与回调参数
 
-- **`BEGIN PRIVATE KEY`**：PKCS#8 私钥，常见于工具导出。
-- **`BEGIN PUBLIC KEY`**：SPKI 公钥，常用于「支付宝公钥」文本配置。
-- **`BEGIN CERTIFICATE`**：需按 X.509 加载后再取公钥，不可与 SPKI 公钥 PEM 混用。
+- **`BEGIN PRIVATE KEY`**：PKCS#8 私钥。  
+- **`BEGIN PUBLIC KEY`**：SPKI。  
+- **`BEGIN CERTIFICATE`**：先解析证书再取公钥。  
 
-同步跳转 GET 参数中 **`sign` 为 Base64**，解析查询串时需避免把 `sign` 内的 `+` 误当作空格；其它参数如 `timestamp` 中 `+` 表示空格的行为需与待签串一致（见各项目解析实现）。
+同步跳转中 **`sign` 为 Base64**，勿破坏其中的 `+`。
 
 ## 开源打包与分发
 
-克隆或下载本仓库后，将 `alipay-open-platform-keys` 目录复制到目标环境的 skills 路径（见上文 **环境与工具**）。发布到 GitHub 时，建议在 README 中附上 Cursor、Claude Code 两节安装说明及官方文档链接。
+将 `alipay-open-platform-keys` 目录复制到各环境的 skills 路径即可。
