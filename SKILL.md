@@ -2,14 +2,14 @@
 name: alipay-open-platform-keys
 description: >-
   支付宝开放平台 RSA2 密钥：用 scripts/generate_alipay_rsa2_keys.sh（OpenSSL）生成公钥模式密钥对或证书模式 CSR；控制台绑定与支付宝公钥配置为必需外部步骤。
-  说明应用私钥/支付宝公钥职责、公钥与证书模式差异、验签排查要点。详见 SKILL 正文与 reference.md（依赖检查、报错表、官方文档链接）。
+  说明应用私钥/支付宝公钥职责、公钥与证书模式差异、验签排查要点。详见 SKILL 正文与 references/reference.md（依赖检查、报错表、官方文档链接）。
 ---
 
 # 支付宝开放平台密钥（RSA2）
 
 ## 本 Skill 做什么
 
-用 **`scripts/generate_alipay_rsa2_keys.sh`** + [reference.md](reference.md) 完成 **本地生成 → 控制台上传公钥或 CSR → 配置 env/SDK → 加签与回调验签**；**不依赖**桌面密钥工具或 MCP。必须在 [开放平台](https://open.alipay.com) **开发信息** 中完成 **应用侧密钥或证书配置**，并获取 **支付宝公钥/证书**（业务步骤，非脚本可代替）。
+用 **`scripts/generate_alipay_rsa2_keys.sh`** + [references/reference.md](references/reference.md) 完成 **本地生成 → 控制台上传公钥或 CSR → 配置 env/SDK → 加签与回调验签**；**不依赖**桌面密钥工具或 MCP。必须在 [开放平台](https://open.alipay.com) **开发信息** 中完成 **应用侧密钥或证书配置**，并获取 **支付宝公钥/证书**（业务步骤，非脚本可代替）。
 
 **脚本用法**：在仓库中路径一般为 `skills/alipay-open-platform-keys/scripts/generate_alipay_rsa2_keys.sh`。公钥模式直接执行；证书模式加 **`--cert`** 与 **`--subj`**（或 `ALIPAY_CSR_SUBJ`）。完整参数执行 **`bash …/generate_alipay_rsa2_keys.sh --help`**。
 
@@ -23,7 +23,7 @@ description: >-
 | 控制台上传、下载平台证书 | 是 |
 | 网关权限、产品签约 | 是 |
 
-执行前确认 **`openssl` 可用**（见 [reference.md](reference.md)）。脚本**不需要** Python。
+执行前确认 **`openssl` 可用**（见 [references/reference.md](references/reference.md)）。脚本**不需要** Python。
 
 ## 何时用
 
@@ -50,7 +50,7 @@ description: >-
 
 1. **生成密钥**：优先执行 **`generate_alipay_rsa2_keys.sh`**；成功则终端已有 PEM、路径与下一步——向用户复述**目录绝对路径**与控制台操作，**非必要不重复粘贴完整私钥**。
 2. **CI**：用 **`--no-print`**。
-3. **失败**：对照 [reference.md「常见报错引导」](reference.md#常见报错引导)。
+3. **失败**：对照 [references/reference.md「常见报错引导」](references/reference.md#常见报错引导)。
 4. **密钥与证书职责**：公钥模式为「应用私钥 / 应用公钥 / 支付宝公钥」；证书模式为「应用私钥 / CSR→应用证书 / 平台证书链」，以文档为准。
 5. **验签失败**：区分请求侧（应用私钥与控制台应用公钥/证书是否匹配）与回调侧（支付宝公钥或证书是否最新、参数编码是否破坏待签串）。
 6. **公私钥匹配**：用户仅询问「是否成对 / 如何校验」时，**只说明**如何用 **`verify_alipay_rsa2_keypair.sh`** 或 **`rsa_keys_match`** 在**本机终端**执行，给出命令与预期输出即可；**不要**主动代跑会读取私钥路径的命令，**不要**要求用户粘贴私钥全文。若用户明确要求 Agent 代跑，可用 **`--no-print`** 类思路避免在回复中复述 PEM；仍优先让用户本地执行。
@@ -67,4 +67,4 @@ description: >-
 
 ## 延伸阅读
 
-[reference.md](reference.md)（依赖、脚本说明、报错表、官方文档、PEM 与安全）。
+[references/reference.md](references/reference.md)（依赖、脚本说明、报错表、官方文档、PEM 与安全）。
