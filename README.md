@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Bash + OpenSSL](https://img.shields.io/badge/requirements-Bash%20%7C%20OpenSSL-informational.svg)](https://www.openssl.org/)
-[![GitHub release](https://img.shields.io/github/v/release/zhangke091/alipay-open-platform-keys)](https://github.com/zhangke091/alipay-open-platform-keys/releases)
+[![GitHub](https://img.shields.io/badge/GitHub-repo-181717?logo=github)](https://github.com/zhangke091/alipay-open-platform-keys)
 
 本 Skill 面向 **[支付宝开放平台](https://open.alipay.com)**：帮助在本地完成 **RSA2 应用密钥的生成、轮换与公私钥校验**，并说明如何把产物与开放平台 **开发信息**（应用公钥/证书上传、支付宝公钥获取）以及业务代码中的 **加签、回调验签** 对齐。它不替代控制台配置，但覆盖开放平台接口常用的密钥侧工作流。
 
