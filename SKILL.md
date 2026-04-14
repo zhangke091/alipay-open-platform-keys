@@ -1,8 +1,8 @@
 ---
 name: alipay-open-platform-keys
 description: >-
-  支付宝开放平台 RSA2 密钥：用 scripts/generate_alipay_rsa2_keys.sh（OpenSSL）生成公钥模式密钥对或证书模式 CSR；控制台绑定与支付宝公钥配置为必需外部步骤。
-  说明应用私钥/支付宝公钥职责、公钥与证书模式差异、验签排查要点。详见 SKILL 正文与 references/reference.md（依赖检查、报错表、官方文档链接）。
+  优化支付宝开放平台 RSA2 密钥接入动线：用 Bash/OpenSSL 脚本生成公钥模式密钥对或证书模式 CSR，串联控制台绑定、环境变量与 SDK 配置、加签与回调验签及公私钥校验；不依赖桌面密钥工具或 MCP。
+  说明公钥/证书模式差异、应用私钥与支付宝公钥职责、验签失败排查。在用户接入开放平台、轮换密钥、invalid-signature、PEM/CSR、OpenSSL 报错时使用。详见 references/reference.md（依赖、报错表、官方文档）。
 ---
 
 # 支付宝开放平台密钥（RSA2）
